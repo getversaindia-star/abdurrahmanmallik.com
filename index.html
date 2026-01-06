@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TheVersaSphere</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Bengali:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* --- 1. VIBRANT PROFESSIONAL THEME --- */
+        :root {
+            --bg-body: #F0F4F8;
+            --bg-card: #FFFFFF;
+            
+            /* Primary Professional Blue */
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            
+            /* New Vibrant Accents (Pink/Purple) */
+            --accent-pink: #EC4899;
+            --accent-purple: #8B5CF6;
+            --gradient-pop: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+            
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            
+            --shadow-soft: 0 4px 20px rgba(148, 163, 184, 0.15);
+            --shadow-pop: 0 10px 30px rgba(236, 72, 153, 0.2);
+            
+            --border-light: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            padding-bottom: 90px;
+            position: relative;
+        }
+        
+        /* Language Fonts */
+        body.lang-ar { font-family: 'Noto Sans Arabic', sans-serif; }
+        body.lang-hi { font-family: 'Noto Sans Devanagari', sans-serif; }
+        body.lang-bn { font-family: 'Noto Sans Bengali', sans-serif; }
+
+        /* --- BACKGROUND BLOBS (3D Effect) --- */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.6;
+            z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        .blob-1 { top: -10%; right: -10%; width: 300px; height: 300px; background: rgba(236, 72, 153, 0.3); }
+        .blob-2 { bottom: 10%; left: -10%; width: 250px; height: 250px; background: rgba(37, 99, 235, 0.2); }
+        .blob-3 { top: 40%; left: 20%; width: 150px; height: 150px; background: rgba(139, 92, 246, 0.25); animation-delay: 2s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(10px, 20px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 65px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 1.2rem; z-index: 1000;
+            box-shadow: 0 1px 0 rgba(226, 232, 240, 0.6);
+        }
+
+        .logo {
+            font-size: 1.3rem; font-weight: 800;
+            background: var(--gradient-pop); /* Pink/Purple Logo */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-btn {
+            font-size: 1.8rem; color: var(--text-main);
+            background: none; border: none; padding: 5px; cursor: pointer;
+        }
+
+        /* --- DRAWER --- */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30, 41, 59, 0.4); z-index: 2000;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+            backdrop-filter: blur(3px);
+        }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
+
+        .drawer {
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+            background: var(--bg-card); z-index: 2001;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        }
+        .drawer.active { right: 0; }
+        html[dir="rtl"] .drawer { right: auto; left: -300px; }
+        html[dir="rtl"] .drawer.active { left: 0; }
+
+        .drawer-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, #F0F4F8 0%, #E0E7FF 100%);
+        }
+        .drawer-content { padding: 1.5rem; overflow-y: auto; }
+
+        .lang-radio {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px; margin-bottom: 8px;
+            background: var(--bg-body); border-radius: 10px;
+            border: 1px solid transparent; transition: 0.2s;
+        }
+        .lang-radio.active {
+            background: var(--gradient-pop); color: white;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }
+        .lang-radio.active .radio-circle { border-color: white; }
+        .radio-circle {
+            width: 18px; height: 18px; border: 2px solid var(--text-muted); border-radius: 50%;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .container { padding: 90px 1.2rem 2rem; max-width: 650px; margin: 0 auto; }
+
+        .page-header { text-align: center; margin-bottom: 2.5rem; position: relative; }
+        .page-title { font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem; }
+        /* Underline decoration */
+        .page-title::after {
+            content: ''; display: block; width: 60px; height: 4px;
+            background: var(--gradient-pop); margin: 8px auto 0; border-radius: 2px;
+        }
+
+        /* CARD STYLE - With subtle 3D lift */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 1.5rem; margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-soft); border: 1px solid white;
+            transition: transform 0.2s; position: relative; overflow: hidden;
+        }
+        /* Subtle colored line on top */
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent-pink), transparent);
+            opacity: 0.5;
+        }
+
+        .app-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+        
+        /* APP ICON IMAGE STYLE */
+        .app-icon-img {
+            width: 64px; height: 64px;
+            border-radius: 16px; object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: white; /* Fallback bg if transparent img */
+            padding: 4px; border: 1px solid var(--border-light);
+        }
+        
+        /* Fallback if image fails */
+        .app-icon-img.fallback {
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--primary-dark), var(--accent-purple));
+            color: white; font-size: 2rem; padding: 0;
+        }
+
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        .btn {
+            padding: 12px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.96); }
+
+        .btn-primary {
+            background: var(--primary); color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+        .btn-visit {
+            background: white; color: var(--text-main);
+            border: 1px solid var(--border-light);
+            /* Pink gradient text effect on hover/default */
+            position: relative; overflow: hidden;
+        }
+        .btn-visit span {
+            background: var(--gradient-pop); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;
+        }
+
+        /* --- REVIEWS (Colorful Pills) --- */
+        .reviews-header { margin: 2rem 0 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .review-card {
+            background: white; padding: 1.2rem; border-radius: 16px; margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+        /* Decor dots */
+        .review-card::after {
+            content: ''; position: absolute; top: 15px; right: 15px;
+            width: 8px; height: 8px; border-radius: 50%; background: var(--accent-pink); opacity: 0.5;
+        }
+
+        /* --- ABOUT TAGS (Colorful) --- */
+        .skill-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+        .skill-pill {
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;
+            background: white; border: 1px solid var(--border-light);
+            color: var(--text-main);
+        }
+        /* Highlight specific skills with color */
+        .skill-pill:nth-child(odd) { border-color: rgba(236, 72, 153, 0.3); color: var(--accent-pink); }
+        .skill-pill:nth-child(even) { border-color: rgba(37, 99, 235, 0.3); color: var(--primary); }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 75px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
+            border-top-left-radius: 20px; border-top-right-radius: 20px; /* Floating look */
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-muted); text-decoration: none; font-size: 0.7rem; gap: 4px;
+            width: 100%; height: 100%;
+        }
+        .nav-item i { font-size: 1.5rem; transition: 0.3s; color: #94A3B8; }
+        .nav-item.active i {
+            color: transparent; 
+            background: var(--gradient-pop);
+            -webkit-background-clip: text;
+            background-clip: text;
+            transform: translateY(-5px); 
+            font-weight: fill;
+        }
+        .nav-item.active span { color: var(--text-main); font-weight: 600; }
+        /* Active Indicator Dot */
+        .nav-item.active::after {
+            content: ''; width: 5px; height: 5px; background: var(--accent-pink);
+            border-radius: 50%; margin-top: 2px;
+        }
+
+        .view-section { display: none; opacity: 0; transform: translateY(10px); transition: 0.3s; }
+        .view-section.active-view { display: block; opacity: 1; transform: translateY(0); }
+        /* --- POSTER SLIDER STYLES --- */
+.poster-section {
+    margin-top: 2.5rem;
+    text-align: center;
+    overflow: hidden; /* Keeps it neat */
+}
+
+.poster-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* The Scrolling Container */
+.slider-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 20px; /* Space between boxes */
+    padding: 20px 50%; /* This trick centers the active box */
+    padding-left: 20px; /* Start padding */
+    padding-right: 20px; /* End padding */
+    
+    /* Hide Scrollbars */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+}
+
+/* FIXED SQUARE BOX IMAGE */
+.slide-img {
+    /* 1. Force a Fixed Square Size */
+    width: 260px;
+    height: 260px;
+
+    /* 2. Auto-Fit the Image */
+    object-fit: cover; /* Fills the box perfectly without stretching/distorting */
+    /* Note: If you want to see the FULL poster without cropping, change 'cover' to 'contain' */
+
+    /* 3. Layout Fixes */
+    flex-shrink: 0; /* Prevents the box from getting squished */
+    scroll-snap-align: center;
+    
+    /* 4. Visual Style */
+    border-radius: 20px;
+    border: 2px solid white;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    background-color: #f1f5f9; /* Background color in case image loads slowly */
+}
+
+
+/* Hint Text at the bottom */
+.swipe-hint {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    opacity: 0.8;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Background Blobs for 3D/Color Pop -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">TheVersaSphere</div>
+        <button class="menu-btn" onclick="toggleDrawer()">
+            <i class="ph ph-dots-nine"></i>
+        </button>
+    </header>
+
+    <!-- Side Drawer -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <div class="drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <h2 data-i18n="settings">Settings</h2>
+            <p data-i18n="preferences" style="color:var(--text-muted); font-size:0.9rem;">Personalize Theme & Lang</p>
+        </div>
+        <div class="drawer-content">
+            <div style="margin-bottom:1rem; font-weight:700; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Language</div>
+            
+            <div class="lang-radio active" onclick="changeLang('en', this)">
+                <span>English</span><div class="radio-circle"></div>
+            </div>
+            <div class="lang-radio" onclick="changeLang('hi', this)">
+                <span>हिन्दी (Hindi)</span><div class="radio-circle"></div>
+            </div>
+            <div class="lang-radio" onclick="changeLang('ar', this)">
+                <span>العربية (Arabic)</span><div class="radio-circle"></div>
+            </div>
+            <div class="lang-radio" onclick="changeLang('bn', this)">
+                <span>বাংলা (Bengali)</span><div class="radio-circle"></div>
+            </div>
+
+             <div style="margin: 2rem 0 1rem; font-weight:700; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Support</div>
+             <div style="padding:1rem; background:rgba(236, 72, 153, 0.05); border-radius:12px; border:1px solid rgba(236, 72, 153, 0.2);">
+                 <small style="color:var(--accent-pink);">UPI ID</small>
+                 <div style="font-family:monospace; font-weight:600; margin-top:4px;">9239529167@fam</div>
+             </div>
+        </div>
+    </div>
+     <!-- MAIN CONTAINER -->
+    <div class="container">
+
+        <!-- === HOME === -->
+        <div id="view-home" class="view-section active-view">
+            <div class="page-header">
+                <h1 class="page-title" data-i18n="hero_title">The Versa Ecosystem</h1>
+                <p style="color:var(--text-muted);" data-i18n="hero_subtitle">Next-Gen Digital Solutions.</p>
+            </div>
+
+            <!-- Card 1: VersaApp -->
+            <div class="card">
+                <div class="app-header">
+                    <!-- Image Placeholder 1 -->
+                    <img src="versaapp.png" alt="VersaApp" class="app-icon-img" onerror="this.classList.add('fallback'); this.src=''; this.innerHTML='<i class=\'ph ph-pencil-circle\'></i>'">
+                    <div class="app-details">
+                        <h3>VersaApp</h3>
+                        <p data-i18n="desc_versa">Professional booking for web dev & design services.</p>
+                    </div>
+                </div>
+                <div class="action-grid">
+                    <a href="https://drive.google.com/uc?id=1boA4Bhz8oSsUvb9Z3rPuejv0jcJuB6Yq" target="_blank" class="btn btn-primary">
+                        <i class="ph ph-download-simple"></i> <span data-i18n="btn_download">APK</span>
+                    </a>
+                    <a href="https://getversaindia-star.github.io/Versa/" target="_blank" class="btn btn-visit">
+                        <i class="ph ph-globe"></i> <span data-i18n="btn_visit">Visit</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2: Versa Portfolio -->
+            <div class="card">
+                <div class="app-header">
+                    <!-- Image Placeholder 2 -->
+                    <img src="versaportfolio.png" alt="Portfolio" class="app-icon-img" onerror="this.classList.add('fallback'); this.src=''; this.innerHTML='<i class=\'ph ph-user\'></i>'">
+                    <div class="app-details">
+                        <h3 data-i18n="title_portfolio">Versa Portfolio</h3>
+                        <p data-i18n="desc_portfolio">The creator's official digital showcase.</p>
+                    </div>
+                </div>
+                <div class="action-grid">
+                    <a href="https://drive.google.com/uc?id=1P1sR8ObHjLvPdtZVClILwVRs_S7ZB0Me" target="_blank" class="btn btn-primary">
+                        <i class="ph ph-download-simple"></i> <span data-i18n="btn_download">App</span>
+                    </a>
+                    <a href="https://mallikabdurrahman37-hash.github.io/Versa-/index.html#contact" target="_blank" class="btn btn-visit">
+                        <i class="ph ph-globe"></i> <span data-i18n="btn_visit">Visit</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3: Sahay -->
+            <div class="card">
+                <div class="app-header">
+                    <!-- Image Placeholder 3 -->
+                    <img src="sahay.png" alt="Sahay" class="app-icon-img" onerror="this.classList.add('fallback'); this.src=''; this.innerHTML='<i class=\'ph ph-heart\'></i>'">
+                    <div class="app-details">
+                        <h3>Sahay</h3>
+                        <p data-i18n="desc_sahay">Social aid platform for jobs & help.</p>
+                    </div>
+                </div>
+                <div class="action-grid">
+                    <a href="https://drive.google.com/uc?id=11GFqUlDdJzzlogHsEsNbR2ys9sOxJ8ic" target="_blank" class="btn btn-primary">
+                        <i class="ph ph-download-simple"></i> <span data-i18n="btn_download">APK</span>
+                    </a>
+                    <a href="https://getsahayindia-star.github.io/Sahay/" target="_blank" class="btn btn-visit">
+                        <i class="ph ph-globe"></i> <span data-i18n="btn_visit">Visit</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="reviews-header">
+                <h3 style="font-size:1.1rem; color:var(--text-main);" data-i18n="recent_reviews">Community Love</h3>
+                
+            </div>
+            
+            <!-- Colorful Reviews -->
+            <div class="review-card">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="width:32px; height:32px; background:var(--accent-pink); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:0.8rem; font-weight:700;">S</div>
+                    <div>
+                        <div style="font-size:0.9rem; font-weight:700;">Sarah K.</div>
+                        <div style="font-size:0.7rem; color:var(--accent-purple);">★★★★★</div>
+                    </div>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;" data-i18n="review_1">"VersaApp's booking flow is incredibly smooth. The UI feels premium."</p>
+            </div>
+
+            <div class="review-card">
+                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="width:32px; height:32px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:0.8rem; font-weight:700;">A</div>
+                    <div>
+                        <div style="font-size:0.9rem; font-weight:700;">Amit R.</div>
+                        <div style="font-size:0.7rem; color:var(--accent-purple);">★★★★★</div>
+                    </div>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;" data-i18n="review_2">"Sahay connects people instantly. A truly helpful initiative."</p>
+            </div>
+            <div class="poster-section">
+    <div class="poster-title" data-i18n="highlights">Official Highlights</div>
+    
+    <div class="slider-container">
+        <img src="poster1.png" class="slide-img" alt="Poster 1">
+        
+        <img src="poster2.png" class="slide-img" alt="Poster 2">
+        
+        <img src="poster3.png" class="slide-img" alt="Poster 3">
+    </div>
+
+    <div class="swipe-hint">
+        <i class="ph ph-arrow-left"></i> 
+        <span data-i18n="swipe_txt">Swipe to Explore</span> 
+        <i class="ph ph-arrow-right"></i>
+    </div>
+</div>
+
+        </div>
+
+        <!-- === ABOUT === -->
+        <div id="view-about" class="view-section">
+            <div class="page-header">
+                <div style="width:90px; height:90px; background:white; border-radius:50%; margin:0 auto 1rem; padding:4px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                    <div style="width:100%; height:100%; background:var(--gradient-pop); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">
+                        <i class="ph ph-user" style="font-size:2.5rem;"></i>
+                    </div>
+                </div>
+                <h1 class="page-title">Abdur Rahman</h1>
+                <p style="font-size:0.9rem; color:var(--accent-purple); font-weight:600;" data-i18n="role">Creator & Developer</p>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size:1.1rem; margin-bottom:0.5rem; color:var(--text-main);">About Me</h3>
+                <p style="font-size:0.9rem; line-height:1.6; color:var(--text-muted);" data-i18n="about_desc">
+                    I bridge the gap between complex technology and social needs. My mission is to build digital tools that are not only beautiful but create real-world impact.
+                </p>
+                <div class="skill-list">
+                    <span class="skill-pill">UI/UX Design</span>
+                    <span class="skill-pill">Frontend Dev</span>
+                    <span class="skill-pill">Social Impact</span>
+                    <span class="skill-pill">App Dev</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Vision</h3>
+                <p style="font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                    To expand the Versa Ecosystem into a nationwide network helping millions access services and aid effortlessly.
+                </p>
+            </div>
+        </div>
+
+        <!-- === CONTACT === -->
+        <div id="view-contact" class="view-section">
+             <div class="page-header">
+                <h1 class="page-title" data-i18n="contact">Get in Touch</h1>
+                <p>Collaborate or say hi!</p>
+            </div>
+
+            <div class="card">
+                <a href="https://wa.me/919239529167" target="_blank" style="display:flex; align-items:center; gap:1rem; padding:12px; border-bottom:1px solid #eee; text-decoration:none;">
+                    <div style="width:40px; height:40px; background:#dcf8c6; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                        <i class="ph ph-whatsapp-logo" style="color:#25D366; font-size:1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem; color:#888;">WhatsApp</div>
+                        <div style="color:var(--text-main); font-weight:600;">+91 9239529167</div>
+                    </div>
+                </a>
+                
+                <a href="mailto:Getsahay.india@gmail.com" style="display:flex; align-items:center; gap:1rem; padding:12px; text-decoration:none; margin-top:10px;">
+                    <div style="width:40px; height:40px; background:#ffebeb; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                        <i class="ph ph-envelope-simple" style="color:#EA4335; font-size:1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem; color:#888;">Email</div>
+                        <div style="color:var(--text-main); font-weight:600;">Getsahay.india</div>
+                    </div>
+                </a>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+                <a href="https://www.instagram.com/mallik.edittion?igsh=YXNwdm52OWxydnpz" target="_blank" style="background:white; border-radius:16px; padding:1.5rem; text-align:center; text-decoration:none; box-shadow:var(--shadow-soft);">
+                    <i class="ph ph-instagram-logo" style="font-size:2rem; color:#C13584;"></i>
+                    <div style="margin-top:5px; font-weight:600; color:var(--text-main); font-size:0.9rem;">Instagram</div>
+                </a>
+                <a href="https://youtube.com/@ayatserenity-t4i?si=95L1cSpIJ32j_NzN" target="_blank" style="background:white; border-radius:16px; padding:1.5rem; text-align:center; text-decoration:none; box-shadow:var(--shadow-soft);">
+                    <i class="ph ph-youtube-logo" style="font-size:2rem; color:#FF0000;"></i>
+                    <div style="margin-top:5px; font-weight:600; color:var(--text-main); font-size:0.9rem;">YouTube</div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="switchTab('home', this)">
+            <i class="ph ph-house"></i>
+            <span data-i18n="home">Home</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('about', this)">
+            <i class="ph ph-user"></i>
+            <span data-i18n="about">About</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('contact', this)">
+            <i class="ph ph-chat-circle-dots"></i>
+            <span data-i18n="contact">Contact</span>
+        </a>
+    </nav>
+
+    <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('sideDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            if (drawer.classList.contains('active')) {
+                drawer.classList.remove('active');
+                overlay.classList.remove('active');
+            } else {
+                drawer.classList.add('active');
+                overlay.classList.add('active');
+            }
+        }
+
+        function switchTab(viewId, el) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active-view'));
+            setTimeout(() => {
+                document.getElementById('view-' + viewId).classList.add('active-view');
+            }, 50);
+            window.scrollTo(0,0);
+        }
+
+        // Image Error Handler Script (already inline, but backup logic here)
+        document.querySelectorAll('img').forEach(img => {
+            img.onerror = function() {
+                this.style.display = 'none';
+                this.nextElementSibling.style.display = 'flex'; // Show icon fallback if structured that way
+            }
+        });
+
+        const translations = {
+            en: {
+                home: "Home", about: "About", contact: "Contact", settings: "Settings", preferences: "Personalize Theme & Lang",
+                hero_title: "The Versa Ecosystem", hero_subtitle: "Next-Gen Digital Solutions.",
+                desc_versa: "Professional booking for web dev & design services.",
+                title_portfolio: "Versa Portfolio", desc_portfolio: "The creator's official digital showcase.",
+                desc_sahay: "Social aid platform for jobs & help.",
+                btn_download: "APK", btn_visit: "Visit",
+                recent_reviews: "Community Love",
+                review_1: "\"VersaApp's booking flow is incredibly smooth. The UI feels premium.\"",
+                review_2: "\"Sahay connects people instantly. A truly helpful initiative.\"",
+                role: "Creator & Developer", about_desc: "I bridge the gap between complex technology and social needs.",
+            },
+            hi: {
+                home: "होम", about: "परिचय", contact: "संपर्क", settings: "सेटिंग्स", preferences: "थीम और भाषा बदलें",
+                hero_title: "वर्सा इकोसिस्टम", hero_subtitle: "अगली पीढ़ी के डिजिटल समाधान।",
+                desc_versa: "वेब विकास और डिजाइन सेवाओं के लिए पेशेवर बुकिंग।",
+                title_portfolio: "वर्सा पोर्टफोलियो", desc_portfolio: "निर्माता का आधिकारिक डिजिटल शोकेस।",
+                desc_sahay: "नौकरियों और मदद के लिए सामाजिक सहायता मंच।",
+                btn_download: "एपीके", btn_visit: "वेबसाइट",
+                recent_reviews: "सामुदायिक समीक्षा",
+                review_1: "\"VersaApp की बुकिंग प्रक्रिया बहुत आसान है। UI प्रीमियम लगता है।\"",
+                review_2: "\"Sahay लोगों को तुरंत जोड़ता है। वास्तव में एक मददगार पहल।\"",
+                role: "निर्माता और डेवलपर", about_desc: "मैं जटिल तकनीक और सामाजिक जरूरतों के बीच की खाई को पाटता हूं।",
+            },
+            ar: {
+                home: "الرئيسية", about: "عني", contact: "اتصل", settings: "الإعدادات", preferences: "تخصيص السمة واللغة",
+                hero_title: "نظام فيرسا", hero_subtitle: "حلول رقمية من الجيل التالي.",
+                desc_versa: "حجز احترافي لخدمات تطوير الويب والتصميم.",
+                title_portfolio: "محفظة فيرسا", desc_portfolio: "العرض الرقمي الرسمي للمبدع.",
+                desc_sahay: "منصة مساعدة اجتماعية للوظائف والمساعدة.",
+                btn_download: "تحميل", btn_visit: "زيارة",
+                recent_reviews: "حب المجتمع",
+                review_1: "\"تدفق الحجز في VersaApp سلس للغاية. واجهة المستخدم تبدو متميزة.\"",
+                review_2: "\"يربط Sahay الناس على الفور. مبادرة مفيدة حقًا.\"",
+                role: "المبدع والمطور", about_desc: "أنا أسد الفجوة بين التكنولوجيا المعقدة والاحتياجات الاجتماعية.",
+            },
+            bn: {
+                home: "হোম", about: "পরিচিতি", contact: "যোগাযোগ", settings: "সেটিংস", preferences: "থিম এবং ভাষা পরিবর্তন করুন",
+                hero_title: "ভার্সা ইকোসিস্টেম", hero_subtitle: "পরবর্তী প্রজন্মের ডিজিটাল সমাধান।",
+                desc_versa: "ওয়েব ডেভেলপমেন্ট এবং ডিজাইন পরিষেবার জন্য পেশাদার বুকিং।",
+                title_portfolio: "ভার্সা পোর্টফোলিও", desc_portfolio: "নির্মাতার অফিসিয়াল ডিজিটাল শোকেস।",
+                desc_sahay: "চাকরি এবং সাহায্যের জন্য সামাজিক সহায়তা প্ল্যাটফর্ম।",
+                btn_download: "এপিকে", btn_visit: "ওয়েবসাইট",
+                recent_reviews: "কমিউনিটি রিভিউ",
+                review_1: "\"VersaApp-এর বুকিং প্রক্রিয়া অবিশ্বাস্যভাবে মসৃণ। UI প্রিমিয়াম মনে হয়।\"",
+                review_2: "\"Sahay মানুষকে তাৎক্ষণিকভাবে সংযুক্ত করে। সত্যিই একটি সহায়ক উদ্যোগ।\"",
+                role: "স্রষ্টা এবং ডেভেলপার", about_desc: "আমি জটিল প্রযুক্তি এবং সামাজিক চাহিদগুলোর মধ্যে ব্যবধান দূর করি।",
+            }
+        };
+
+        function changeLang(lang, el) {
+            document.querySelectorAll('.lang-radio').forEach(r => r.classList.remove('active'));
+            el.classList.add('active');
+            document.body.className = '';
+            if (lang !== 'en') document.body.classList.add('lang-' + lang);
+            if (lang === 'ar') document.documentElement.setAttribute('dir', 'rtl');
+            else document.documentElement.setAttribute('dir', 'ltr');
+            
+            const t = translations[lang];
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (t[key]) elem.textContent = t[key];
+            });
+            setTimeout(toggleDrawer, 300);
+        }
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
